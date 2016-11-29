@@ -276,7 +276,14 @@
 
       // Set up some event handlers.
       window.addEventListener('resize', function() { scaleThing(); });
-      window.addEventListener('hashchange', function() { displayThing(getThingByLabel(window.location.hash)); });
+      window.addEventListener('hashchange', function() {
+        // Don't do anything when clearing the hash.
+        if(window.location.hash == '' || window.location.hash == '#') return;
+        // Don't re-display if the hash matches the current thing.
+        var thing = getThingByLabel(window.location.hash);
+        if(CURRENT_THING && CURRENT_THING.id == thing.id) return;
+        displayThing(thing);
+      });
       document.body.addEventListener('click', function() {
         ga('send', 'event', 'Body', 'click');
         displayThing(getNextShuffledThing(), false);
