@@ -162,6 +162,7 @@
           // Use the hash to load a specific thing.
           var id = parseInt(window.location.hash.substr(1), 10);
           if(0 < id && id <= THINGS.length) {
+            ga('send', 'event', 'Hash Load', 'load', id);
             thing = THINGS[id - 1]
             thing.label = id;
           }
