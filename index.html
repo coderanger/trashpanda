@@ -68,6 +68,26 @@
         #000 2px 0px 0,
         #000 0px 0px 2px;
     }
+    #tip {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      height: 400px;
+      width: 600px;
+      margin-top: -200px;
+      margin-left: -300px;
+      background-color: #333;
+      align-items: center;
+      text-align: center;
+    }
+    #tip.show {
+      display: flex;
+    }
+    #tip-text {
+      text-shadow: none;
+      font-size: 80px;
+    }
   </style>
 </head>
 <body>
@@ -76,6 +96,11 @@
     <div id="thing">
       <div id="caption"></div>
       <div id="attribution"></div>
+      <div id="tip">
+        <div id="tip-text">
+          Click or press spacebar for more.
+        </div>
+      </div>
     </div>
   </div>
 
@@ -132,6 +157,7 @@
       // {image: '.jpg', caption: '', position: [0, 0], attribution: ''},
     ];
     var CURRENT_THING = null;
+    var TIP_TIMER = null;
 
     // Add labels and some default values.
     for(var i=0; i<THINGS.length; i++) {
@@ -193,12 +219,25 @@
       return getThingById(prevId);
     }
 
+    // Clear the tip timer.
+    var clearTipTimer = function() {
+      if(TIP_TIMER) {
+        clearTimeout(TIP_TIMER);
+        TIP_TIMER = null;
+      }
+      // Try to not show it again.
+      if(window.localStorage) {
+        localStorage.setItem('sawTip', 'true');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       // Get persistent references to some elements.
       var containerElm = document.getElementById('container');
       var thingElm = document.getElementById('thing');
       var captionElm = document.getElementById('caption');
       var attributionElm = document.getElementById('attribution');
+      var tipElm = document.getElementById('tip');
 
       // Helper methods.
       var scaleThing = function(elm) {
@@ -287,6 +326,7 @@
       document.body.addEventListener('click', function() {
         ga('send', 'event', 'Body', 'click');
         displayThing(getNextShuffledThing(), false);
+        clearTipTimer();
       });
       document.body.addEventListener('keydown', function(evt) {
         if(evt.keyCode && (evt.keyCode == 32 || evt.keyCode == 37 || evt.keyCode == 39)) {
@@ -298,16 +338,19 @@
                 // Space.
                 ga('send', 'event', 'Arrow Keys', 'press', 'space');
                 displayThing(getNextShuffledThing(), false);
+                clearTipTimer();
                 break;
               case 37:
                 // Left arrow.
                 ga('send', 'event', 'Arrow Keys', 'press', 'left');
                 displayThing(getPrevThing(), true);
+                clearTipTimer();
                 break;
               case 39:
                 // Right arrow.
                 ga('send', 'event', 'Arrow Keys', 'press', 'right');
                 displayThing(getNextThing(), true);
+                clearTipTimer();
                 break;
             }
           }
@@ -315,6 +358,20 @@
         }
         return true;
       });
+      tipElm.addEventListener('click', function(evt) {
+        evt.stopPropagation();
+        // Hide it.
+        tipElm.className = '';
+        // Try to not show again.
+        clearTipTimer();
+      });
+
+      // Start the tip timer if needed.
+      if(!window.localStorage || localStorage.getItem('sawTip') != 'true') {
+        TIP_TIMER = setTimeout(function() {
+          tipElm.className = 'show';
+        }, 4000);
+      }
 
       // Do initial load.
       if(window.location.hash && window.location.hash != '#') {
