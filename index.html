@@ -133,6 +133,13 @@
     ];
     var CURRENT_THING = null;
 
+    // Add labels and some default values.
+    for(var i=0; i<THINGS.length; i++) {
+      THINGS[i].label = i+1;
+      THINGS[i].size = THINGS[i].size || 140;
+      THINGS[i].background = THINGS[i].background || '#000';
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       // Get persistent references to some elements.
       var containerElm = document.getElementById('container');
@@ -151,20 +158,15 @@
         }
       };
 
-      var getThing = function(checkHash, notRandomId, thingId) {
+      var getThing = function(checkHash, notRandomId) {
         // Get a thing to use.
         var thing = null;
-        if(thingId) {
-          thing = THINGS[parseInt(thingId, 10) - 1];
-          thing.label = thingId;
-        }
-        if(!thing && checkHash && window.location.hash && window.location.hash != '#') {
+        if(checkHash && window.location.hash && window.location.hash != '#') {
           // Use the hash to load a specific thing.
           var id = parseInt(window.location.hash.substr(1), 10);
           if(0 < id && id <= THINGS.length) {
             ga('send', 'event', 'Hash Load', 'load', id);
-            thing = THINGS[id - 1]
-            thing.label = id;
+            thing = THINGS[id - 1];
           }
         }
         if(!thing) {
@@ -174,11 +176,7 @@
             id = Math.floor(Math.random() * THINGS.length);
           } while(notRandomId && id+1 == notRandomId);
           thing = THINGS[id];
-          thing.label = id + 1;
         }
-        // Fill in default values.
-        thing.size = thing.size || 140;
-        thing.background = thing.background || '#000';
         return thing;
       };
 
@@ -255,7 +253,7 @@
             // Left arrow.
             var prevId = CURRENT_THING.label - 1;
             if(prevId <= 0) prevId = THINGS.length;
-            displayThing(getThing(false, null, prevId));
+            displayThing(THINGS[prevId-1]);
             window.location.hash = '#' + prevId;
             ga('send', 'event', 'Arrow Keys', 'press', 'left');
           }
@@ -263,7 +261,7 @@
             // Right arrow.
             var nextId = CURRENT_THING.label + 1;
             if(nextId > THINGS.length) nextId = 1;
-            displayThing(getThing(false, null, nextId));
+            displayThing(THINGS[nextId-1]);
             window.location.hash = '#' + nextId;
             ga('send', 'event', 'Arrow Keys', 'press', 'right');
           }
