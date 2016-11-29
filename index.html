@@ -6,6 +6,7 @@
   <link rel="shortcut icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="stylesheet" href="fonts/stylesheet.css">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
   <style>
     body {
       margin: 0;
@@ -24,6 +25,11 @@
         #000 5px 0px 0,
         #000 0px 0px 5px;
       overflow: hidden;
+    }
+    /* The only CSS reset I care about. */
+    a {
+      color: inherit;
+      text-decoration: none;
     }
     #container {
       position: absolute;
@@ -44,17 +50,12 @@
     #thing {
       position: relative;
     }
-    #caption, #attribution {
+    #caption, #attribution, #github {
       position: absolute;
     }
     #attribution {
       bottom: 5px;
       right: 5px;
-    }
-    #caption a, #attribution a {
-      /* The only CSS reset I care about. */
-      color: #FFF;
-      text-decoration: none;
     }
     #attribution a {
       font-size: 10px;
@@ -67,6 +68,16 @@
         #000 2px -2px 0,
         #000 2px 0px 0,
         #000 0px 0px 2px;
+    }
+    #github {
+      bottom: 5px;
+      left: 5px;
+      font-size: 50px;
+      text-shadow: none;
+      color: #FFF7;
+    }
+    #github:hover {
+      color: #FFF;
     }
     #tip {
       display: none;
@@ -94,6 +105,9 @@
   <div id="container">
     <div id="loading">Loading ...</div>
     <div id="thing">
+      <div id="github">
+        <a href="https://github.com/coderanger/trashpanda" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+      </div>
       <div id="caption"></div>
       <div id="attribution"></div>
       <div id="tip">
