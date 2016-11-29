@@ -289,18 +289,27 @@
         displayThing(getNextShuffledThing(), false);
       });
       document.body.addEventListener('keydown', function(evt) {
-        if(evt.keyCode && 37 <= evt.keyCode && evt.keyCode <= 40) {
+        if(evt.keyCode && (evt.keyCode == 32 || evt.keyCode == 37 || evt.keyCode == 39)) {
           evt.stopPropagation();
           evt.preventDefault();
-          if(!loadingThing && CURRENT_THING && evt.keyCode == 37) {
-            // Left arrow.
-            ga('send', 'event', 'Arrow Keys', 'press', 'left');
-            displayThing(getPrevThing(), true);
-          }
-          else if(!loadingThing && CURRENT_THING && evt.keyCode == 39) {
-            // Right arrow.
-            ga('send', 'event', 'Arrow Keys', 'press', 'right');
-            displayThing(getNextThing(), true);
+          if(!loadingThing && CURRENT_THING) {
+            switch(evt.keyCode) {
+              case 32:
+                // Space.
+                ga('send', 'event', 'Arrow Keys', 'press', 'space');
+                displayThing(getNextShuffledThing(), false);
+                break;
+              case 37:
+                // Left arrow.
+                ga('send', 'event', 'Arrow Keys', 'press', 'left');
+                displayThing(getPrevThing(), true);
+                break;
+              case 39:
+                // Right arrow.
+                ga('send', 'event', 'Arrow Keys', 'press', 'right');
+                displayThing(getNextThing(), true);
+                break;
+            }
           }
           return false;
         }
