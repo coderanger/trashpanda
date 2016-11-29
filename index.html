@@ -135,9 +135,62 @@
 
     // Add labels and some default values.
     for(var i=0; i<THINGS.length; i++) {
-      THINGS[i].label = i+1;
+      THINGS[i].id = i;
       THINGS[i].size = THINGS[i].size || 140;
       THINGS[i].background = THINGS[i].background || '#000';
+    }
+
+    // Create a shuffled list of things for use with randomization.
+    var SHUFFLED_THINGS = []
+    for(var i=0; i<THINGS.length; i++) {
+      SHUFFLED_THINGS.push(THINGS[i].id);
+    }
+    for(var counter=SHUFFLED_THINGS.length-1; counter>=0; counter--) {
+      // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+      var index = Math.floor(Math.random() * (counter+1));
+      // And swap the last element with it
+      var temp = SHUFFLED_THINGS[counter];
+      SHUFFLED_THINGS[counter] = SHUFFLED_THINGS[index];
+      SHUFFLED_THINGS[index] = temp;
+    }
+
+    var getThingById = function(id) {
+      if(0 <= id && id < THINGS.length) {
+        return THINGS[id];
+      } else {
+        return THINGS[0];
+      }
+    }
+
+    var getThingByLabel = function(label) {
+      if(label[0] === '#') label = label.substr(1);
+      return getThingById(parseInt(label, 10) - 1);
+    }
+
+    // Get the next thing in the random sequence.
+    var getNextShuffledThing = function() {
+      // Shouldn't happen, but just in case.
+      if(!CURRENT_THING) { return getThingById(SHUFFLED_THINGS[0]); }
+      var shuffleIndex = SHUFFLED_THINGS.indexOf(CURRENT_THING.id) + 1;
+      if(shuffleIndex >= SHUFFLED_THINGS.length) shuffleIndex = 0;
+      return getThingById(SHUFFLED_THINGS[shuffleIndex]);
+    }
+
+    // Get the next thing in numerical order.
+    var getNextThing = function() {
+      // Shouldn't happen, but just in case.
+      if(!CURRENT_THING) { return THINGS[0]; }
+      var nextId = (CURRENT_THING.id + 1) % THINGS.length;
+      return getThingById(nextId);
+    }
+
+    // Get the previous thing in numerical order.
+    var getPrevThing = function() {
+      // Shouldn't happen, but just in case.
+      if(!CURRENT_THING) { return THINGS[0]; }
+      var prevId = (CURRENT_THING.id - 1) % THINGS.length;
+      if(prevId < 0) prevId = prevId + THINGS.length;
+      return getThingById(prevId);
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -158,30 +211,8 @@
         }
       };
 
-      var getThing = function(checkHash, notRandomId) {
-        // Get a thing to use.
-        var thing = null;
-        if(checkHash && window.location.hash && window.location.hash != '#') {
-          // Use the hash to load a specific thing.
-          var id = parseInt(window.location.hash.substr(1), 10);
-          if(0 < id && id <= THINGS.length) {
-            ga('send', 'event', 'Hash Load', 'load', id);
-            thing = THINGS[id - 1];
-          }
-        }
-        if(!thing) {
-          // Get a random thing as a fallback.
-          var id;
-          do {
-            id = Math.floor(Math.random() * THINGS.length);
-          } while(notRandomId && id+1 == notRandomId);
-          thing = THINGS[id];
-        }
-        return thing;
-      };
-
       var loadingThing = false;
-      var displayThing = function(thing) {
+      var displayThing = function(thing, setHash) {
         // Only load one thing at a time.
         if(loadingThing) return;
         loadingThing = true;
@@ -202,10 +233,10 @@
           // Populate and position caption/attribution.
           var captionLink = document.createElement('a');
           captionLink.innerText = thing.caption;
-          captionLink.href = '#' + thing.label;
+          captionLink.href = '#' + (thing.id+1);
           captionLink.addEventListener('click', function(evt) {
             evt.stopPropagation();
-            ga('send', 'event', 'Caption', 'click', thing.label);
+            ga('send', 'event', 'Caption', 'click', thing.id+1);
             return true;
           });
           captionElm.style.top = thing.position[0] + 'px';
@@ -218,7 +249,7 @@
           attributeLink.target = '_blank';
           attributeLink.addEventListener('click', function(evt) {
             evt.stopPropagation();
-            ga('send', 'event', 'Attribution', 'click', thing.label);
+            ga('send', 'event', 'Attribution', 'click', thing.id+1);
             return true;
           });
           attributionElm.appendChild(attributeLink);
@@ -228,10 +259,16 @@
           document.title = thing.caption;
           // Set background color.
           document.body.style['background-color'] = thing.background;
+          // Either set or unset the location hash, or leave it alone if setHash is not passed.
+          if(setHash === true) {
+            window.location.hash = '#' + (thing.id + 1);
+          } else if(setHash === false) {
+            if(window.location.hash && window.location.hash != '#') window.location.hash = '';
+          }
           // Done loading.
           loadingThing = false;
           CURRENT_THING = thing;
-          ga('set', 'page', '/'+thing.label);
+          ga('set', 'page', '/'+(thing.id+1));
           ga('send', 'pageview');
         });
         elm.src = thing.image;
@@ -239,11 +276,10 @@
 
       // Set up some event handlers.
       window.addEventListener('resize', function() { scaleThing(); });
-      window.addEventListener('hashchange', function() { displayThing(getThing(true)); });
+      window.addEventListener('hashchange', function() { displayThing(getThingByLabel(window.location.hash)); });
       document.body.addEventListener('click', function() {
-        if(window.location.hash && window.location.hash != '#') window.location.hash = '';
         ga('send', 'event', 'Body', 'click');
-        displayThing(getThing(false, CURRENT_THING.label));
+        displayThing(getNextShuffledThing(), false);
       });
       document.body.addEventListener('keydown', function(evt) {
         if(evt.keyCode && 37 <= evt.keyCode && evt.keyCode <= 40) {
@@ -251,19 +287,13 @@
           evt.preventDefault();
           if(!loadingThing && CURRENT_THING && evt.keyCode == 37) {
             // Left arrow.
-            var prevId = CURRENT_THING.label - 1;
-            if(prevId <= 0) prevId = THINGS.length;
-            displayThing(THINGS[prevId-1]);
-            window.location.hash = '#' + prevId;
             ga('send', 'event', 'Arrow Keys', 'press', 'left');
+            displayThing(getPrevThing(), true);
           }
           else if(!loadingThing && CURRENT_THING && evt.keyCode == 39) {
             // Right arrow.
-            var nextId = CURRENT_THING.label + 1;
-            if(nextId > THINGS.length) nextId = 1;
-            displayThing(THINGS[nextId-1]);
-            window.location.hash = '#' + nextId;
             ga('send', 'event', 'Arrow Keys', 'press', 'right');
+            displayThing(getNextThing(), true);
           }
           return false;
         }
@@ -271,7 +301,11 @@
       });
 
       // Do initial load.
-      displayThing(getThing(true));
+      if(window.location.hash && window.location.hash != '#') {
+        displayThing(getThingByLabel(window.location.hash));
+      } else {
+        displayThing(getNextShuffledThing());
+      }
     });
 
     // Google tracking, sorry.
