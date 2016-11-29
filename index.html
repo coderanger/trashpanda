@@ -5,11 +5,12 @@
   <title>Trash Panda Dot Club</title>
   <link rel="shortcut icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/favicon.png">
+  <link rel="stylesheet" href="fonts/stylesheet.css">
   <style>
     body {
       margin: 0;
       background-color: #000;
-      font-family: Impact, Haettenschweiler, Franklin Gothic Bold, Charcoal, Helvetica Inserat, Bitstream Vera Sans Bold, Arial Black, sans serif;
+      font-family: League Gothic;
       color: #FFF;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -84,7 +85,7 @@
       {image: '2.jpg', caption: 'Danger Noodle', position: [130, 60], attribution: 'https://commons.wikimedia.org/wiki/File:Big_Sur_Snake.JPG'},
       {image: '3.jpg', caption: 'Nope Rope', position: [80, 330], attribution: 'https://www.flickr.com/photos/aspexdesign/7497277648'},
       {image: '4.jpg', caption: 'Wizard Cow', position: [70, 150], attribution: 'https://commons.wikimedia.org/wiki/File:Mountain_Goat_Mount_Massive.JPG'},
-      {image: '5.jpg', caption: 'American Murder Log', position: [30, 70], size: 70, attribution: 'https://commons.wikimedia.org/wiki/File:Two_american_alligators.jpg'},
+      {image: '5.jpg', caption: 'American Murder Log', position: [30, 70], size: 100, attribution: 'https://commons.wikimedia.org/wiki/File:Two_american_alligators.jpg'},
       {image: '6.jpg', caption: 'Murder Log', position: [90, 60], attribution: 'https://commons.wikimedia.org/wiki/File:SaltwaterCrocodile(\'Maximo\').jpg'},
       {image: '7.jpg', caption: 'Fart Squirrel', position: [490, 280], attribution: 'https://www.flickr.com/photos/payayita/3255905969/'},
       {image: '8.jpg', caption: 'Majestic Sea Flap Flap', position: [740, 230], attribution: 'https://commons.wikimedia.org/wiki/File:Manta_Ray,_Lisboa_aquarium_2008.jpg'},
@@ -140,7 +141,7 @@
           thing.label = id + 1;
         }
         // Fill in default values.
-        thing.size = thing.size || 100;
+        thing.size = thing.size || 140;
         thing.background = thing.background || '#000';
         return thing;
       };
