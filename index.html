@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Trash Panda Dot Club</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      font-family: Impact, Haettenschweiler, Franklin Gothic Bold, Charcoal, Helvetica Inserat, Bitstream Vera Sans Bold, Arial Black, sans serif;
+      color: #FFF;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: #000 5px 5px 0,
+        #000 0px 5px 0,
+        #000 -5px 5px 0,
+        #000 -5px 0px 0,
+        #000 -5px -5px 0,
+        #000 0px -5px 0,
+        #000 5px -5px 0,
+        #000 5px 0px 0,
+        #000 0px 0px 5px;
+    }
+    #container {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+    #loading {
+      font-size: 100px;
+    }
+    .loaded #loading {
+      display: none;
+    }
+    #thing {
+      position: relative;
+    }
+    #caption, #attribution {
+      position: absolute;
+    }
+    #attribution {
+      bottom: 5px;
+      right: 5px;
+    }
+    #attribution a {
+      color: #FFF;
+      text-decoration: none;
+      font-size: 10px;
+      text-shadow: #000 2px 2px 0,
+        #000 0px 2px 0,
+        #000 -2px 2px 0,
+        #000 -2px 0px 0,
+        #000 -2px -2px 0,
+        #000 0px -2px 0,
+        #000 2px -2px 0,
+        #000 2px 0px 0,
+        #000 0px 0px 2px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="loading">Loading ...</div>
+    <div id="thing">
+      <div id="caption"></div>
+      <div id="attribution"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var THINGS = [
+      {image: '1.jpg', caption: 'trash panda', position: [50, 430], attribution: 'https://www.flickr.com/photos/tambako/3576301909'},
+      {image: '2.jpg', caption: 'danger noodle', position: [130, 60], attribution: 'https://commons.wikimedia.org/wiki/File:Big_Sur_Snake.JPG'},
+      {image: '3.jpg', caption: 'nope rope', position: [80, 330], attribution: 'https://www.flickr.com/photos/aspexdesign/7497277648'},
+    ];
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Get persistent references to some elements.
+      var containerElm = document.getElementById('container');
+      var thingElm = document.getElementById('thing');
+      var captionElm = document.getElementById('caption');
+      var attributionElm = document.getElementById('attribution');
+
+      // Helper methods.
+      var scaleThing = function(elm) {
+        elm = elm || document.getElementById('picture');
+        if(elm) {
+          var xScale = document.documentElement.clientWidth / elm.width;
+          var yScale = document.documentElement.clientHeight / elm.height;
+          var xyScale = Math.min(xScale, yScale);
+          thingElm.style.transform = 'scale('+xyScale+','+xyScale+')';
+        }
+      };
+
+      var getThing = function(checkHash, notRandomId) {
+        // Get a thing to use.
+        var thing = null;
+        if(checkHash && window.location.hash) {
+          // Use the hash to load a specific thing.
+          var id = parseInt(window.location.hash.substr(1), 10);
+          if(0 < id && id <= THINGS.length) {
+            thing = THINGS[id - 1]
+            thing.label = id;
+          }
+        }
+        if(!thing) {
+          // Get a random thing as a fallback.
+          var id;
+          do {
+            id = Math.floor(Math.random() * THINGS.length);
+          } while(notRandomId && id+1 == notRandomId);
+          thing = THINGS[id];
+          thing.label = id + 1;
+        }
+        // Fill in default values.
+        thing.size = thing.size || 100;
+        thing.background = thing.background || '#000';
+        return thing;
+      };
+
+      var loadingThing = false;
+      var displayThing = function(thing) {
+        // Only load one thing at a time.
+        if(loadingThing) return;
+        loadingThing = true;
+        // Display a thing.
+        var elm = document.createElement('img');
+        elm.addEventListener('load', function() {
+          // Hide the loading indicator if needed.
+          document.body.className = 'loaded';
+          // Remove any existing image.
+          var oldImg = document.getElementById('picture');
+          if(oldImg) oldImg.parentNode.removeChild(oldImg);
+          // Display the image.
+          elm.id = 'picture';
+          thingElm.appendChild(elm);
+          // Populate and position caption/attribution.
+          captionElm.innerText = thing.caption;
+          captionElm.style.top = thing.position[0] + 'px';
+          captionElm.style.left = thing.position[1] + 'px';
+          captionElm.style['font-size'] = thing.size + 'px';
+          attributionElm.innerHTML = '<a href="'+thing.attribution+'">'+thing.attribution+'</a>';
+          // Scale the thing to match the screen.
+          scaleThing(elm);
+          // Apply the label.
+          window.location.hash = thing.label;
+          // Set background color.
+          document.body.style['background-color'] = thing.background;
+          // Done loading.
+          loadingThing = false;
+        });
+        elm.src = thing.image;
+      };
+
+      // Set up some event handlers.
+      window.addEventListener('resize', function() { scaleThing(); });
+      window.addEventListener('hashchange', function() { displayThing(getThing(true)); });
+      document.body.addEventListener('click', function() {
+        var currentLabel = window.location.hash && window.location.hash.substr(1);
+        displayThing(getThing(false, currentLabel));
+      });
+
+      // Do initial load.
+      displayThing(getThing(true));
+    });
+  </script>
+</body>
+</html>
+
