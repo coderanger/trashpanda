@@ -47,9 +47,12 @@
       bottom: 5px;
       right: 5px;
     }
-    #attribution a {
+    #caption a, #attribution a {
+      /* The only CSS reset I care about. */
       color: #FFF;
       text-decoration: none;
+    }
+    #attribution a {
       font-size: 10px;
       text-shadow: #000 2px 2px 0,
         #000 0px 2px 0,
@@ -83,6 +86,7 @@
       {image: '7.jpg', caption: 'Fart Squirrel', position: [490, 280], attribution: 'https://www.flickr.com/photos/payayita/3255905969/'},
       // {image: '.jpg', caption: '', position: [0, 0], attribution: ''},
     ];
+    var CURRENT_THING = null;
 
     document.addEventListener('DOMContentLoaded', function () {
       // Get persistent references to some elements.
@@ -105,7 +109,7 @@
       var getThing = function(checkHash, notRandomId) {
         // Get a thing to use.
         var thing = null;
-        if(checkHash && window.location.hash) {
+        if(checkHash && window.location.hash && window.location.hash != '#') {
           // Use the hash to load a specific thing.
           var id = parseInt(window.location.hash.substr(1), 10);
           if(0 < id && id <= THINGS.length) {
@@ -144,20 +148,33 @@
           // Display the image.
           elm.id = 'picture';
           thingElm.appendChild(elm);
+          // Clear existing caption/attribution links.
+          while (captionElm.hasChildNodes()) { captionElm.removeChild(captionElm.lastChild); }
+          while (attributionElm.hasChildNodes()) { attributionElm.removeChild(attributionElm.lastChild); }
           // Populate and position caption/attribution.
-          captionElm.innerText = thing.caption;
+          var captionLink = document.createElement('a');
+          captionLink.innerText = thing.caption;
+          captionLink.href = '#' + thing.label;
+          captionLink.addEventListener('click', function(evt) { evt.stopPropagation(); return true; });
           captionElm.style.top = thing.position[0] + 'px';
           captionElm.style.left = thing.position[1] + 'px';
           captionElm.style['font-size'] = thing.size + 'px';
-          attributionElm.innerHTML = '<a href="'+thing.attribution+'">'+thing.attribution+'</a>';
+          captionElm.appendChild(captionLink);
+          var attributeLink = document.createElement('a');
+          attributeLink.href = thing.attribution;
+          attributeLink.innerText = thing.attribution;
+          attributeLink.target = '_blank';
+          attributeLink.addEventListener('click', function(evt) { evt.stopPropagation(); return true; });
+          attributionElm.appendChild(attributeLink);
           // Scale the thing to match the screen.
           scaleThing(elm);
-          // Apply the label.
-          window.location.hash = thing.label;
+          // Change the title.
+          document.title = thing.caption;
           // Set background color.
           document.body.style['background-color'] = thing.background;
           // Done loading.
           loadingThing = false;
+          CURRENT_THING = thing;
         });
         elm.src = thing.image;
       };
@@ -166,8 +183,8 @@
       window.addEventListener('resize', function() { scaleThing(); });
       window.addEventListener('hashchange', function() { displayThing(getThing(true)); });
       document.body.addEventListener('click', function() {
-        var currentLabel = window.location.hash && window.location.hash.substr(1);
-        displayThing(getThing(false, currentLabel));
+        if(window.location.hash && window.location.hash != '#') window.location.hash = '';
+        displayThing(getThing(false, CURRENT_THING.label));
       });
 
       // Do initial load.
