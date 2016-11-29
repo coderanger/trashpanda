@@ -220,6 +220,7 @@
             var prevId = CURRENT_THING.label - 1;
             if(prevId <= 0) prevId = THINGS.length;
             displayThing(getThing(false, null, prevId));
+            window.location.hash = '#' + prevId;
             ga('send', 'event', 'Arrow Keys', 'press', 'left');
           }
           else if(!loadingThing && CURRENT_THING && evt.keyCode == 39) {
@@ -227,6 +228,7 @@
             var nextId = CURRENT_THING.label + 1;
             if(nextId > THINGS.length) nextId = 1;
             displayThing(getThing(false, null, nextId));
+            window.location.hash = '#' + nextId;
             ga('send', 'event', 'Arrow Keys', 'press', 'right');
           }
           return false;
