@@ -115,10 +115,14 @@
         }
       };
 
-      var getThing = function(checkHash, notRandomId) {
+      var getThing = function(checkHash, notRandomId, thingId) {
         // Get a thing to use.
         var thing = null;
-        if(checkHash && window.location.hash && window.location.hash != '#') {
+        if(thingId) {
+          thing = THINGS[parseInt(thingId, 10) - 1];
+          thing.label = thingId;
+        }
+        if(!thing && checkHash && window.location.hash && window.location.hash != '#') {
           // Use the hash to load a specific thing.
           var id = parseInt(window.location.hash.substr(1), 10);
           if(0 < id && id <= THINGS.length) {
@@ -205,6 +209,28 @@
         if(window.location.hash && window.location.hash != '#') window.location.hash = '';
         ga('send', 'event', 'Body', 'click');
         displayThing(getThing(false, CURRENT_THING.label));
+      });
+      document.body.addEventListener('keydown', function(evt) {
+        if(evt.keyCode && 37 <= evt.keyCode && evt.keyCode <= 40) {
+          evt.stopPropagation();
+          evt.preventDefault();
+          if(!loadingThing && CURRENT_THING && evt.keyCode == 37) {
+            // Left arrow.
+            var prevId = CURRENT_THING.label - 1;
+            if(prevId <= 0) prevId = THINGS.length;
+            displayThing(getThing(false, null, prevId));
+            ga('send', 'event', 'Arrow Keys', 'press', 'left');
+          }
+          else if(!loadingThing && CURRENT_THING && evt.keyCode == 39) {
+            // Right arrow.
+            var nextId = CURRENT_THING.label + 1;
+            if(nextId > THINGS.length) nextId = 1;
+            displayThing(getThing(false, null, nextId));
+            ga('send', 'event', 'Arrow Keys', 'press', 'right');
+          }
+          return false;
+        }
+        return true;
       });
 
       // Do initial load.
