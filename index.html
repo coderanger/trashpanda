@@ -44,13 +44,13 @@
     #loading {
       font-size: 100px;
     }
-    .loaded #loading {
+    .first-load #loading {
       display: none;
     }
     #thing {
       position: relative;
     }
-    #caption, #attribution, #icons {
+    #caption, #attribution, #icons, #innerloading {
       position: absolute;
     }
     #attribution {
@@ -69,13 +69,15 @@
         #000 2px 0px 0,
         #000 0px 0px 2px;
     }
-    #icons {
+    #icons, #innerloading {
       display: none;
-      bottom: 5px;
-      left: 5px;
       font-size: 50px;
       text-shadow: none;
       color: #FFF7;
+    }
+    #icons {
+      bottom: 5px;
+      left: 5px;
     }
     #icons a {
       margin-right: 5px;
@@ -83,7 +85,14 @@
     #icons a:hover {
       color: #FFF;
     }
-    .loaded #icons {
+    .first-load #icons {
+      display: block;
+    }
+    #innerloading {
+      top: 5px;
+      right: 5px;
+    }
+    .first-load.loading #innerloading {
       display: block;
     }
     #tip {
@@ -112,6 +121,10 @@
   <div id="container">
     <div id="loading">Loading ...</div>
     <div id="thing">
+      <div id="innerloading">
+        <i class="fa fa-spinner fa-spin fa-fw"></i>
+        <span class="sr-only">Loading...</span>
+      </div>
       <div id="icons">
         <a id="github" href="https://github.com/coderanger/trashpanda" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
         <a id="anchor" href="#">#</a>
@@ -282,11 +295,19 @@
         // Only load one thing at a time.
         if(loadingThing) return;
         loadingThing = true;
+        if(!document.body.className.match(/(?:^|\s)loading(?!\S)/)) {
+          document.body.className += ' loading';
+        }
         // Display a thing.
         var elm = document.createElement('img');
         elm.addEventListener('load', function() {
           // Hide the loading indicator if needed.
-          document.body.className = 'loaded';
+          if(!document.body.className.match(/(?:^|\s)first-load(?!\S)/)) {
+            document.body.className += ' first-load';
+          }
+          if(document.body.className.match(/(?:^|\s)loading(?!\S)/)) {
+            document.body.className = document.body.className.replace(/(?:^|\s)loading(?!\S)/g, '');
+          }
           // Remove any existing image.
           var oldImg = document.getElementById('picture');
           if(oldImg) oldImg.parentNode.removeChild(oldImg);
