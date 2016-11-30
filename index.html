@@ -259,6 +259,7 @@
       var captionElm = document.getElementById('caption');
       var attributionElm = document.getElementById('attribution');
       var tipElm = document.getElementById('tip');
+      var githubElm = document.getElementById('github');
 
       // Helper methods.
       var scaleThing = function(elm) {
@@ -386,6 +387,12 @@
         // Try to not show again.
         clearTipTimer();
       });
+      githubElm.addEventListener('click', function(evt) {
+        evt.stopPropagation();
+        ga('send', 'event', 'GitHub', 'click', CURRENT_THING && (CURRENT_THING.id + 1));
+        return true;
+      });
+
 
       // Start the tip timer if needed.
       if(!window.localStorage || localStorage.getItem('sawTip') != 'true') {
