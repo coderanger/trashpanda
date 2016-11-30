@@ -50,7 +50,7 @@
     #thing {
       position: relative;
     }
-    #caption, #attribution, #github {
+    #caption, #attribution, #icons {
       position: absolute;
     }
     #attribution {
@@ -69,7 +69,7 @@
         #000 2px 0px 0,
         #000 0px 0px 2px;
     }
-    #github {
+    #icons {
       display: none;
       bottom: 5px;
       left: 5px;
@@ -77,10 +77,13 @@
       text-shadow: none;
       color: #FFF7;
     }
-    #github:hover {
+    #icons a {
+      margin-right: 5px;
+    }
+    #icons a:hover {
       color: #FFF;
     }
-    .loaded #github {
+    .loaded #icons {
       display: block;
     }
     #tip {
@@ -109,8 +112,9 @@
   <div id="container">
     <div id="loading">Loading ...</div>
     <div id="thing">
-      <div id="github">
-        <a href="https://github.com/coderanger/trashpanda" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+      <div id="icons">
+        <a id="github" href="https://github.com/coderanger/trashpanda" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+        <a id="anchor" href="#">#</a>
       </div>
       <div id="caption"></div>
       <div id="attribution"></div>
@@ -260,6 +264,7 @@
       var attributionElm = document.getElementById('attribution');
       var tipElm = document.getElementById('tip');
       var githubElm = document.getElementById('github');
+      var anchorElm = document.getElementById('anchor');
 
       // Helper methods.
       var scaleThing = function(elm) {
@@ -288,22 +293,13 @@
           // Display the image.
           elm.id = 'picture';
           thingElm.appendChild(elm);
-          // Clear existing caption/attribution links.
-          while (captionElm.hasChildNodes()) { captionElm.removeChild(captionElm.lastChild); }
+          // Clear existing attribution links.
           while (attributionElm.hasChildNodes()) { attributionElm.removeChild(attributionElm.lastChild); }
           // Populate and position caption/attribution.
-          var captionLink = document.createElement('a');
-          captionLink.innerText = thing.caption;
-          captionLink.href = '#' + (thing.id+1);
-          captionLink.addEventListener('click', function(evt) {
-            evt.stopPropagation();
-            ga('send', 'event', 'Caption', 'click', thing.id+1);
-            return true;
-          });
+          captionElm.innerText = thing.caption
           captionElm.style.top = thing.position[0] + 'px';
           captionElm.style.left = thing.position[1] + 'px';
           captionElm.style['font-size'] = thing.size + 'px';
-          captionElm.appendChild(captionLink);
           var attributeLink = document.createElement('a');
           attributeLink.href = thing.attribution;
           attributeLink.innerText = thing.attribution;
@@ -326,6 +322,8 @@
           } else if(setHash === false) {
             if(window.location.hash && window.location.hash != '#') window.location.hash = '';
           }
+          // Set the anchor link.
+          anchorElm.href = '#' + (thing.id + 1);
           // Done loading.
           loadingThing = false;
           CURRENT_THING = thing;
@@ -390,6 +388,11 @@
       githubElm.addEventListener('click', function(evt) {
         evt.stopPropagation();
         ga('send', 'event', 'GitHub', 'click', CURRENT_THING && (CURRENT_THING.id + 1));
+        return true;
+      });
+      anchorElm.addEventListener('click', function(evt) {
+        evt.stopPropagation();
+        ga('send', 'event', 'Anchor', 'click', CURRENT_THING && (CURRENT_THING.id + 1));
         return true;
       });
 
